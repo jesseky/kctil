@@ -25,7 +25,9 @@ function PromiseAnyway(arr, limit, wrap, calldone, callerror) {
           }
           dones++;
           result[n] = nerr;
-          if (dones === total) {
+          if (arr.length) {
+            run(total - arr.length);
+          } else if (dones === total) {
             resolve(result);
           }
         });
@@ -53,8 +55,21 @@ function dateTime(d) {
   let ds = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()].map(v => (v.toString().length < 2 ? "0" + v : v));
   return ds.slice(0, 3).join("-") + " " + ds.slice(3, 6).join(":");
 }
+// log
 function log(...args) {
-  console.log(...[dateTime(new Date()) + " " + (typeof args[0] === "string" ? args[0] : JSON.stringify(args[0])), ...args.slice(1)]);
+  console.log(...["[" + dateTime(new Date()) + "] " + (typeof args[0] === "string" ? args[0] : JSON.stringify(args[0])), ...args.slice(1)]);
+}
+// log error
+function loge(...args) {
+  console.error(...["\x1b[31m✗ [" + dateTime(new Date()) + "] " + (typeof args[0] === "string" ? args[0] : JSON.stringify(args[0])), ...args.slice(1)]);
+}
+// log right
+function logr(...args) {
+  console.log(...["\x1b[32m✓ [" + dateTime(new Date()) + "] " + (typeof args[0] === "string" ? args[0] : JSON.stringify(args[0])), ...args.slice(1)]);
+}
+// log warn
+function logw(...args) {
+  console.log(...["\x1b[33m⚡[" + dateTime(new Date()) + "] " + (typeof args[0] === "string" ? args[0] : JSON.stringify(args[0])), ...args.slice(1)]);
 }
 function zip(a, b) {
   return a.map((v, i) => [v, b[i]]);
@@ -110,6 +125,9 @@ module.exports = {
   appendFile,
   dateTime,
   log,
+  loge,
+  logr,
+  logw,
   zip,
   format,
   formatSize
