@@ -1,0 +1,24 @@
+{
+  "name": "kctil",
+  "version": "1.0.0",
+  "description": "kctil main method is promise-anyway, which runs with limit concurrency and resolve after all jobs done",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jesseky/kctil.git"
+  },
+  "keywords": [
+    "promise",
+    "concurrency",
+    "limit"
+  ],
+  "author": "jesseky",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jesseky/kctil/issues"
+  },
+  "homepage": "https://github.com/jesseky/kctil#readme"
+}
