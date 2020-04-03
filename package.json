@@ -1,7 +1,7 @@
 {
   "name": "kctil",
-  "version": "1.0.1",
-  "description": "kctil main method is promise-anyway, which runs with limit concurrency and resolve after all jobs done",
+  "version": "1.0.2",
+  "description": "kctil main method is PromiseAnyway, which runs with limit concurrency and resolve after all jobs done",
   "main": "index.js",
   "scripts": {
     "test": "node test.js && exit 0"

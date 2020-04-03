@@ -117,6 +117,34 @@ function formatSize(size) {
   return Math.round(size / Math.pow(1024, i), "K" === sizename[i] ? 0 : 1) + sizename[i];
 }
 
+function randRange(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min); // min and max included
+}
+
+function sleep(tm) {
+  return new Promise(rs => setTimeout(rs, tm));
+}
+
+function replace(str, param) {
+  // str: http://test.com/name={name}&pass={pass}  param: {'{name}': 'test', '{pass}': 'pass'}
+  for (let k in param) {
+    str = str.replace(new RegExp(k, "g"), param[k]);
+  }
+  return str;
+}
+
+function escape(str) {
+  return str
+    .split("&")
+    .map(v =>
+      v
+        .split("=")
+        .map(k => encodeURIComponent(k))
+        .join("=")
+    )
+    .join("&");
+}
+
 module.exports = {
   PromiseAnyway,
   existsFile,
@@ -130,5 +158,9 @@ module.exports = {
   logw,
   zip,
   format,
-  formatSize
+  formatSize,
+  randRange,
+  sleep,
+  replace,
+  escape
 };
