@@ -21,7 +21,7 @@ const assert = require("assert");
     assert.equal(kctil.format("[f04] float %-010.5f.", 5.35), "[f04] float 5.35000   .", "should be: [f04] float 5.35000   .");
     assert.equal(kctil.format("[f05] float %010.5f.", 5.35), "[f05] float 0005.35000.", "should be: [f05] float 0005.35000.");
 
-    let arr = ["a", "b", "c", "d", "e", "f", "g"];
+    let array = ["a", "b", "c", "d", "e", "f", "g"];
     let limit = 4;
     let wrap = function(n, v) {
       return new Promise((re, rj) => {
@@ -35,16 +35,16 @@ const assert = require("assert");
         }, 50);
       });
     };
-    let calldone = function(n, v) {
-      let r = `${n}:${v} done`;
+    let calldone = function(n, res) {
+      let r = `${n}:${res} done`;
       console.log(r);
       return r;
     };
-    let callerror = function(n, v) {
-      let r = `${n}:${v} error`;
+    let callerror = function(n, err) {
+      let r = `${n}:${err} error`;
       console.log(r);
     };
-    let results = await kctil.PromiseAnyway(arr, limit, wrap, calldone, callerror);
+    let results = await kctil.PromiseAnyway(array, limit, wrap, calldone, callerror);
     console.log(results.map((r, n) => (r instanceof Error ? `${n}:${r.message} error` : r)));
     assert.deepStrictEqual(results, ["0:ok: 0@a done", "1:ok: 1@b done", "2:ok: 2@c done", new Error("er: 3@d"), "4:ok: 4@e done", new Error("er: 5@f"), "6:ok: 6@g done"], "results should be Array(7) with 3,5 Error");
     console.log(`\x1b[32m✓ all tests passed.`);

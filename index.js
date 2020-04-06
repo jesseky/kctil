@@ -1,58 +1,64 @@
 const fs = require("fs");
-function PromiseAnyway(arr, limit, wrap, calldone, callerror) {
+
+const SECOND = 1e3;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+
+function PromiseAnyway(array, limit, wrap, calldone, callerror) {
+  let arr = array.map((v, i) => [i, v]);
   return new Promise((resolve, reject) => {
-    let total = arr.length;
+    let total = array.length;
     let result = new Array(total);
     let dones = 0;
-    function run(n) {
-      wrap(n, arr.shift())
-        .then(res => {
-          return typeof calldone === "function" ? calldone(n, res) : Promise.resolve(res);
+    function run(va) {
+      wrap(va[0], va[1])
+        .then((res) => {
+          return typeof calldone === "function" ? calldone(va[0], res, va[1]) : Promise.resolve(res);
         })
-        .then(res => {
+        .then((res) => {
           dones++;
-          result[n] = res;
+          result[va[0]] = res;
           if (arr.length) {
-            run(total - arr.length);
+            run(arr.shift());
           } else if (dones === total) {
             resolve(result);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           let nerr = err instanceof Error ? err : new Error(err);
           if (typeof callerror === "function") {
-            callerror(n, nerr);
+            callerror(va[0], nerr, va[1]);
           }
           dones++;
-          result[n] = nerr;
+          result[va[0]] = nerr;
           if (arr.length) {
-            run(total - arr.length);
+            run(arr.shift());
           } else if (dones === total) {
             resolve(result);
           }
         });
     }
-    arr.slice(0, limit).forEach((v, n) => {
-      run(n);
+    array.slice(0, limit).forEach((v) => {
+      run(arr.shift());
     });
   });
 }
 
 function existsFile(f) {
-  return new Promise(r => fs.stat(f, (e, s) => r(e ? false : s)));
+  return new Promise((r) => fs.stat(f, (e, s) => r(e ? false : s)));
 }
 function readFile(path) {
   return new Promise((r, j) => fs.readFile(path, (err, dat) => (err ? j(err) : r(dat))));
 }
 function writeFile(path, data) {
-  return new Promise((r, j) => fs.writeFile(path, data, err => (err ? j(err) : r(true))));
+  return new Promise((r, j) => fs.writeFile(path, data, (err) => (err ? j(err) : r(true))));
 }
 function appendFile(path, data) {
-  return new Promise((r, j) => fs.appendFile(path, data, err => (err ? j(err) : r(true))));
+  return new Promise((r, j) => fs.appendFile(path, data, (err) => (err ? j(err) : r(true))));
 }
 
 function dateTime(d) {
-  let ds = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()].map(v => (v.toString().length < 2 ? "0" + v : v));
+  let ds = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()].map((v) => (v.toString().length < 2 ? "0" + v : v));
   return ds.slice(0, 3).join("-") + " " + ds.slice(3, 6).join(":");
 }
 // log
@@ -76,7 +82,7 @@ function zip(a, b) {
 }
 
 function format(f, ...args) {
-  return f.replace(/\%[-+]?([\d\.]*)([s|f|d])/g, function(ifm, num, type, ...ag) {
+  return f.replace(/\%[-+]?([\d\.]*)([s|f|d])/g, function (ifm, num, type, ...ag) {
     let arg = args.length ? args.shift() : "s" === type ? "" : 0;
     let [pre, sign, dec] = ["", "", 0];
     if (typeof arg !== "number" && ("f" === type || "d" === type)) {
@@ -122,7 +128,7 @@ function randRange(min, max) {
 }
 
 function sleep(tm) {
-  return new Promise(rs => setTimeout(rs, tm));
+  return new Promise((rs) => setTimeout(rs, tm));
 }
 
 function replace(str, param) {
@@ -136,10 +142,10 @@ function replace(str, param) {
 function escape(str) {
   return str
     .split("&")
-    .map(v =>
+    .map((v) =>
       v
         .split("=")
-        .map(k => encodeURIComponent(k))
+        .map((k) => encodeURIComponent(k))
         .join("=")
     )
     .join("&");
@@ -162,5 +168,8 @@ module.exports = {
   randRange,
   sleep,
   replace,
-  escape
+  escape,
+  SECOND,
+  MINUTE,
+  HOUR,
 };
