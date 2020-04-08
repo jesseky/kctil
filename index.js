@@ -78,7 +78,7 @@ function logw(...args) {
   console.log(...["\x1b[33m⚡[" + dateTime(new Date()) + "] " + (typeof args[0] === "string" ? args[0] : JSON.stringify(args[0])), ...args.slice(1)]);
 }
 function zip(a, b) {
-  return a.map((v, i) => [v, b[i]]);
+  return Array.from({ length: Math.max(a.length, b.length) }, (v, i) => [a[i], b[i]]);
 }
 
 function format(f, ...args) {

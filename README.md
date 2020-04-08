@@ -3,10 +3,7 @@
 This package encapsulates some commonly used functions
 
 - PromiseAnyway
-- existsFile
-- readFile
-- writeFile
-- appendFile
+- existsFile, readFile, writeFile, appendFile
 - dateTime
 - log, logr, logw, loge
 - zip
@@ -83,7 +80,7 @@ kctil.log("This is a log");
 // output in terminal [2020-04-01 18:29:22] This is a log
 ```
 
-## zip
+## zip(array1, array2)
 
 Merge two arrays into one
 

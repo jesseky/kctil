@@ -21,9 +21,41 @@ const assert = require("assert");
     assert.equal(kctil.format("[f04] float %-010.5f.", 5.35), "[f04] float 5.35000   .", "should be: [f04] float 5.35000   .");
     assert.equal(kctil.format("[f05] float %010.5f.", 5.35), "[f05] float 0005.35000.", "should be: [f05] float 0005.35000.");
 
+    console.log("Test kctil.format passed");
+
+    assert.deepEqual(
+      kctil.zip(["a", "b"], [1, 2]),
+      [
+        ["a", 1],
+        ["b", 2],
+      ],
+      'zip 1, should be: [["a", 1], ["b", 2]]'
+    );
+
+    assert.deepEqual(
+      kctil.zip(["a", "b", "c"], [1, 2]),
+      [
+        ["a", 1],
+        ["b", 2],
+        ["c", undefined],
+      ],
+      'zip 2, should be: [["a", 1], ["b", 2], ["c", undefined]]'
+    );
+
+    assert.deepEqual(
+      kctil.zip(["a", "b"], [1, 2, 3]),
+      [
+        ["a", 1],
+        ["b", 2],
+        [undefined, 3],
+      ],
+      'zip 3, should be: [["a", 1], ["b", 2], [undefined, 3]]'
+    );
+    assert.deepEqual(kctil.zip([], []), [], "zip 4, should be: []");
+    console.log("Test kctil.zip passed");
     let array = ["a", "b", "c", "d", "e", "f", "g"];
     let limit = 4;
-    let wrap = function(n, v) {
+    let wrap = function (n, v) {
       return new Promise((re, rj) => {
         console.log(`${n}:${v} start`);
         setTimeout(() => {
@@ -35,12 +67,12 @@ const assert = require("assert");
         }, 50);
       });
     };
-    let calldone = function(n, res) {
+    let calldone = function (n, res) {
       let r = `${n}:${res} done`;
       console.log(r);
       return r;
     };
-    let callerror = function(n, err) {
+    let callerror = function (n, err) {
       let r = `${n}:${err} error`;
       console.log(r);
     };
