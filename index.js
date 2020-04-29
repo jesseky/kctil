@@ -1,4 +1,5 @@
 const fs = require("fs");
+const crypto = require("crypto");
 
 const SECOND = 1e3;
 const MINUTE = 60 * SECOND;
@@ -151,6 +152,10 @@ function escape(str) {
     .join("&");
 }
 
+function md5(s) {
+  return crypto.createHash("md5").update(s, "utf-8").digest("hex");
+}
+
 module.exports = {
   PromiseAnyway,
   existsFile,
@@ -169,6 +174,7 @@ module.exports = {
   sleep,
   replace,
   escape,
+  md5,
   SECOND,
   MINUTE,
   HOUR,

@@ -21,7 +21,7 @@ const assert = require("assert");
     assert.equal(kctil.format("[f04] float %-010.5f.", 5.35), "[f04] float 5.35000   .", "should be: [f04] float 5.35000   .");
     assert.equal(kctil.format("[f05] float %010.5f.", 5.35), "[f05] float 0005.35000.", "should be: [f05] float 0005.35000.");
 
-    console.log("Test kctil.format passed");
+    console.log("\x1b[32m✓ Test kctil.format passed");
 
     assert.deepEqual(
       kctil.zip(["a", "b"], [1, 2]),
@@ -52,7 +52,13 @@ const assert = require("assert");
       'zip 3, should be: [["a", 1], ["b", 2], [undefined, 3]]'
     );
     assert.deepEqual(kctil.zip([], []), [], "zip 4, should be: []");
-    console.log("Test kctil.zip passed");
+    console.log("\x1b[32m✓ Test kctil.zip passed");
+
+    assert.equal(kctil.md5("hello"), "5d41402abc4b2a76b9719d911017c592", "md5(hello) = 5d41402abc4b2a76b9719d911017c592");
+    assert.equal(kctil.md5("12345"), "827ccb0eea8a706c4c34a16891f84e7b", "md5(12345) = 827ccb0eea8a706c4c34a16891f84e7b");
+
+    console.log("\x1b[32m✓ Test kctil.md5 passed");
+
     let array = ["a", "b", "c", "d", "e", "f", "g"];
     let limit = 4;
     let wrap = function (n, v) {

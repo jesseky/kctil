@@ -137,6 +137,14 @@ kctil.replace("http://test.com/name={name}&pass={pass}", { "{name}": "hello", "{
 // http://test.com/name=hello&pass=world
 ```
 
+### md5(str)
+
+kctil.md5 function to create md5 hash from string
+
+```js
+kctil.md5("hello); // return 5d41402abc4b2a76b9719d911017c592
+```
+
 #### License
 
 MIT © [Jesse](https://github.com/jesseky)

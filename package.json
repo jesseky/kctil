@@ -1,6 +1,6 @@
 {
   "name": "kctil",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "kctil main method is PromiseAnyway, which runs with limit concurrency and resolve after all jobs done",
   "main": "index.js",
   "scripts": {
