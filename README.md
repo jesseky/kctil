@@ -12,6 +12,7 @@ This package encapsulates some commonly used functions
 - randRange
 - sleep
 - replace
+- md5
 
 ### PromiseAnyway
 
@@ -142,7 +143,7 @@ kctil.replace("http://test.com/name={name}&pass={pass}", { "{name}": "hello", "{
 kctil.md5 function to create md5 hash from string
 
 ```js
-kctil.md5("hello); // return 5d41402abc4b2a76b9719d911017c592
+kctil.md5("hello"); // return 5d41402abc4b2a76b9719d911017c592
 ```
 
 #### License
