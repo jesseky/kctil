@@ -13,6 +13,7 @@ This package encapsulates some commonly used functions
 - sleep
 - replace
 - md5
+- flatHash
 
 ### PromiseAnyway
 
@@ -30,7 +31,9 @@ PromiseAnyway(array, limit, wrap, [calldone = undefined], [callerror = undefined
 // @callerror: function(n, err, val){ }, err is wrap function rejected value.
 //		Called when every single task is rejected. the returned value is just ignored.
 
-// Example: require('node-fetch')
+// Example: npm i kctil node-fetch -g
+const kctil = require('kctil');
+const fetch = require('node-fetch');
 let results = await kctil.PromiseAnyway(['a', 'b', 'c', 'd', 'e'], 3, (n, v)=> new Promise(async (r,j) => {
 		try {
 			let resp = await fetch(`http://test.com/${v}.html`);
@@ -89,6 +92,14 @@ Merge two arrays into one
 kctil.zip(["a", "b", "c"], [1, 2, 3]);
 
 //[ [ 'a', 1 ], [ 'b', 2 ], [ 'c', 3 ] ]
+
+// so we can easy create a plain object using first array as keys, and second array as values
+Object.fromEntries(kctil.zip(["a", "b", "c"], [1, 2, 3]));
+// { a: 1, b: 2, c: 3 }
+
+// or create a Map
+new Map(kctil.zip(["a", "b", "c"], [1, 2, 3]));
+// Map(3) { 'a' => 1, 'b' => 2, 'c' => 3 }
 ```
 
 ### format(formatString, ...args)
@@ -145,6 +156,27 @@ kctil.md5 function to create md5 hash from string
 ```js
 kctil.md5("hello"); // return 5d41402abc4b2a76b9719d911017c592
 ```
+
+### flatHash(json)
+
+kctil.flatHash works like flat package, it creates a new key:value/array with one level deep, it won't flat array, but will flat array's object elements.
+```js
+kctil.flatHash({ a: 1, b: { d: 5, e: { f: 6 } }, c: 3 });
+// output:
+{ a: 1, 'b.d': 5, 'b.e.f': 6, c: 3 }
+
+kctil.flatHash({ result: { data: [{ a: 1, b: { d: 5, e: { f: 6 } }, c: 3 }, { x: 7, y: 8, z: { u: 9, v: 0 } }], status: true }, success: "YES" });
+// output: 
+{
+  'result.data': [
+    { a: 1, 'b.d': 5, 'b.e.f': 6, c: 3 },
+    { x: 7, y: 8, 'z.u': 9, 'z.v': 0 }
+  ],
+  'result.status': true,
+  success: 'YES'
+}
+```
+
 
 #### License
 

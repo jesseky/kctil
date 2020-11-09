@@ -156,6 +156,25 @@ function md5(s) {
   return crypto.createHash("md5").update(s, "utf-8").digest("hex");
 }
 
+function flatHash(o, pre = '') { // 将嵌套的对象转换成一级索引对象 {a: {b: 1, c: 2}, d: 3}  => {a.b: 1, a.c: 2, d: 3}
+  let r = {};
+  if (Object.prototype.toString.call(o) === '[object Object]') {
+    for (let k in o) {
+      let v = o[k];
+      if (Object.prototype.toString.call(v) === '[object Object]') {
+        r = Object.assign(r, flatHash(v, pre + k + '.'));
+      } else if (Object.prototype.toString.call(v) === '[object Array]') {  // 如果转换数组
+        r[pre + k] = v.map(ov => flatHash(ov));
+      } else {
+        r[pre + k] = v;
+      }
+    }
+  } else if (Object.prototype.toString.call(o) === '[object Array]') {
+    return o.map(ov => flatHash(ov, pre));
+  }
+  return r;
+}
+
 module.exports = {
   PromiseAnyway,
   existsFile,
@@ -175,6 +194,7 @@ module.exports = {
   replace,
   escape,
   md5,
+  flatHash,
   SECOND,
   MINUTE,
   HOUR,
