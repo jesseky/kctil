@@ -177,6 +177,19 @@ kctil.flatHash({ result: { data: [{ a: 1, b: { d: 5, e: { f: 6 } }, c: 3 }, { x:
 }
 ```
 
+### range(start, end)
+
+kctil.range to generate a range within the supplied bounds
+```js
+kctil.range(1,5)
+// output: 
+[1, 2, 3, 4, 5]
+
+
+kctil.range(-2,2)
+// output: 
+[-2, -1, 0, 1, 2]
+```
 
 #### License
 

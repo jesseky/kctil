@@ -175,6 +175,11 @@ function flatHash(o, pre = '') { // 将嵌套的对象转换成一级索引对�
   return r;
 }
 
+// 返回 [start..end]数组
+function range(start, end) {
+  return Array.from({ length: end - start + 1 }, (_, i) => i + start);
+}
+
 module.exports = {
   PromiseAnyway,
   existsFile,
@@ -195,6 +200,7 @@ module.exports = {
   escape,
   md5,
   flatHash,
+  range,
   SECOND,
   MINUTE,
   HOUR,

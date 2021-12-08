@@ -66,6 +66,16 @@ const assert = require("assert");
 
     console.log("\x1b[32m✓ Test kctil.flatHash passed");
 
+    assert.deepStrictEqual(kctil.range(1, 5), [1, 2, 3, 4, 5], 'range 1:5, should be [1, 2, 3, 4, 5]');
+    assert.deepStrictEqual(kctil.range(6, 10), [6, 7, 8, 9, 10], 'range 6:10, should be [6, 7, 8, 9, 10]');
+    assert.deepStrictEqual(kctil.range(1, 1), [1], 'range 1:1, should be [1]');
+    assert.deepStrictEqual(kctil.range(1, 0), [], 'range 1:0, should be []');
+    assert.deepStrictEqual(kctil.range(1, 0), [], 'range 0:1, should be [0,1]');
+    assert.deepStrictEqual(kctil.range(-5, -1), [-5, -4, -3, -2, -1], 'range -5:-1, should be [-5, -4, -3, -2, -1]');
+    assert.deepStrictEqual(kctil.range(-2, 2), [-2, -1, 0, 1, 2], 'range -2:2, should be [-2, -1, 0, 1, 2]');
+
+    console.log("\x1b[32m✓ Test kctil.range passed");
+
     let array = ["a", "b", "c", "d", "e", "f", "g"];
     let limit = 4;
     let wrap = function (n, v) {
