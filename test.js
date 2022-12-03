@@ -76,6 +76,17 @@ const assert = require("assert");
 
     console.log("\x1b[32m✓ Test kctil.range passed");
 
+    assert.strictEqual(kctil.replaceParam("{schema}://{host}{path}?{args}", { schema: 'https', host: 'httpbin.org', path: '/post', args: 'hello=world' }), 'https://httpbin.org/post?hello=world', 'replaceParam {schema}://{host}{path}?{args}, should be https://httpbin.org/post?hello=world');
+    assert.strictEqual(kctil.replaceParam("{ schema }://{ host }{ path }?{ args }", { schema: 'https', host: 'httpbin.org', path: '/post', args: 'hello=world' }), 'https://httpbin.org/post?hello=world', 'replaceParam { schema }://{ host }{ path }?{ args }, should be https://httpbin.org/post?hello=world');
+    assert.strictEqual(kctil.replaceParam("{schema}://{host}{path}?user={user}&pass={pass}", { schema: 'https', host: 'httpbin.org', path: '/post', pass: '123' }), 'https://httpbin.org/post?user=&pass=123', 'replaceParam {schema}://{host}{path}?user={user}&pass={pass}, should be https://httpbin.org/post?user=&pass=123');
+    assert.strictEqual(kctil.replaceParam("city={country.province.city[0]}&country={country.name}", { country: { name: 'CN', province: { name: 'GD', city: ['GZ', 'SZ'] } } }), 'city=GZ&country=CN', 'replaceParam city={country.province.city[0]}&country={country.name}, should be city=GZ&country=CN');
+    assert.strictEqual(kctil.replaceParam("city={country.province.city[9]}&country={country.name}", { country: { name: 'CN', province: { name: 'GD', city: ['GZ', 'SZ'] } } }), 'city=&country=CN', 'replaceParam city={country.province.city[9]}&country={country.name}, should be city=&country=CN');
+    assert.strictEqual(kctil.replaceParam("type={[0].ext}&size={[0].size}&alias={[0].alias[0]}", [{ ext: 'jpg', size: 0, alias: ['jpeg'] }, { ext: 'png', size: 0 }]), 'type=jpg&size=0&alias=jpeg', 'replaceParam type={[0].ext}&size={[0].size}&alias={[0].alias[0]}, should be type=jpg&size=0&alias=jpeg');
+    assert.strictEqual(kctil.replaceParam("type={[0][0]}&size={[0][1]}&alias={[0][2]}&type={[0][3].type}&isvideo={[0][3].isvideo}&from={[0][3].from}", [['jpg', 0, 'jpeg', { isvideo: false }], ['mpg', 1024, 'mpeg']]), 'type=jpg&size=0&alias=jpeg&type=&isvideo=false&from=', 'replaceParam type={[0].ext}&size={[0].size}&alias={[0].alias[0]}, should be type=jpg&size=0&alias=jpeg&type=&isvideo=false&from=');
+    assert.strictEqual(kctil.replaceParam("count={stats[0].count}&title={stats[0].title.first[0].abbr}&summary={stats[0].title.first[1].summary}&amount={stats[0].amount}", { stats: [{ count: 5, title: { first: [{ abbr: 'userStat' }] }, amount: 0 }] }), 'count=5&title=userStat&summary=&amount=0', 'replaceParam count={stats[0].count}&name={stats[0].name}, should be count=5&title=userStat&summary=&amount=0');
+
+    console.log("\x1b[32m✓ Test kctil.replaceParam passed");
+
     let array = ["a", "b", "c", "d", "e", "f", "g"];
     let limit = 4;
     let wrap = function (n, v) {

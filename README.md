@@ -14,6 +14,8 @@ This package encapsulates some commonly used functions
 - replace
 - md5
 - flatHash
+- range
+- replaceParam
 
 ### PromiseAnyway
 
@@ -190,6 +192,15 @@ kctil.range(-2,2)
 // output: 
 [-2, -1, 0, 1, 2]
 ```
+
+### replaceParam(str, param)
+kctil.replaceParam to replace all variables in the template which starts with `{` and ends with `}`
+```js
+kctil.replaceParam("count={stats[0].count}&title={stats[0].title.first[0].abbr}&summary={stats[0].title.first[1].summary}&amount={stats[0].amount}", { stats: [{ count: 5, title: { first: [{ abbr: 'userStat' }] }, amount: 0 }] })
+// output: 
+count=5&title=userStat&summary=&amount=0
+```
+
 
 #### License
 

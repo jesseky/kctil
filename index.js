@@ -180,6 +180,18 @@ function range(start, end) {
   return Array.from({ length: end - start + 1 }, (_, i) => i + start);
 }
 
+// 参数替换 
+function replaceParam(str, param) { // str: http://test.com/name={name}&pass={pass}&ipcity={ip.city}  param: {'name': 'test', 'pass': '123', ip: {country: 'CN', city: 'SH' } }
+  return str.replace(/\{\s*([\w\d\[\]\._\-]+)\s*\}/g, (m, p1) => {
+    if (/[\.\[\]]+/.test(p1)) {
+      return p1.replace(/^\[/, '').replace(/\[/g, '.').replace(/\]/g, '').split('.').reduce((res, pv) => {
+        return typeof (res) === 'string' ? res : (typeof (res[pv]) !== 'undefined' ? res[pv] : '');
+      }, param);
+    }
+    return typeof (param[p1]) !== 'undefined' ? param[p1] : '';
+  });
+}
+
 module.exports = {
   PromiseAnyway,
   existsFile,
@@ -201,6 +213,7 @@ module.exports = {
   md5,
   flatHash,
   range,
+  replaceParam,
   SECOND,
   MINUTE,
   HOUR,
