@@ -16,6 +16,7 @@ This package encapsulates some commonly used functions
 - flatHash
 - range
 - replaceParam
+- batchSlice
 
 ### PromiseAnyway
 
@@ -199,6 +200,20 @@ kctil.replaceParam to replace all variables in the template which starts with `{
 kctil.replaceParam("count={stats[0].count}&title={stats[0].title.first[0].abbr}&summary={stats[0].title.first[1].summary}&amount={stats[0].amount}", { stats: [{ count: 5, title: { first: [{ abbr: 'userStat' }] }, amount: 0 }] })
 // output: 
 count=5&title=userStat&summary=&amount=0
+```
+
+### batchSlice(array, batch, callback, callafter = null)
+
+kctil.batchSlice is to split an array into a fixed number of batches and pass them to the callback function
+```js
+kctil.batchSlice(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], 3, (slice, serial, from, to) => {
+  console.log('slice:', slice, 'serial:', serial, 'from:', from, 'to:', to);
+});
+// output:
+'slice:' [ 'a', 'b', 'c' ] 'serial:' 0 'from:' 0 'to:' 3
+'slice:' [ 'd', 'e', 'f' ] 'serial:' 1 'from:' 3 'to:' 6
+'slice:' [ 'g', 'h', 'i' ] 'serial:' 2 'from:' 6 'to:' 9
+'slice:' [ 'j' ] 'serial:' 3 'from:' 9 'to:' 10
 ```
 
 

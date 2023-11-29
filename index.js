@@ -58,7 +58,8 @@ function appendFile(path, data) {
   return new Promise((r, j) => fs.appendFile(path, data, (err) => (err ? j(err) : r(true))));
 }
 
-function dateTime(d) {
+function dateTime(d = null) {
+  if (!d) d = new Date();
   let ds = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()].map((v) => (v.toString().length < 2 ? "0" + v : v));
   return ds.slice(0, 3).join("-") + " " + ds.slice(3, 6).join(":");
 }
@@ -192,6 +193,21 @@ function replaceParam(str, param) { // str: http://test.com/name={name}&pass={pa
   });
 }
 
+// batchSlice 分批次获取数组元素，并执行回调函数
+function batchSlice(array, batch, callback, callafter = null) {
+  let [from, serial, total, quantity] = [0, 0, array.length, Number.isInteger(batch) && batch > 0 ? batch : 1];
+  do {
+    const to = Math.min(from + quantity, total);
+    const slice = array.slice(from, to);
+    callback(slice, serial, from, to);
+    from += quantity;
+    serial++;
+  } while (from < total && total > 0);
+  if (callafter && typeof callafter === 'function') {
+    callafter(serial);
+  }
+}
+
 module.exports = {
   PromiseAnyway,
   existsFile,
@@ -214,6 +230,7 @@ module.exports = {
   flatHash,
   range,
   replaceParam,
+  batchSlice,
   SECOND,
   MINUTE,
   HOUR,

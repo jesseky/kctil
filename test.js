@@ -113,9 +113,59 @@ const assert = require("assert");
     let results = await kctil.PromiseAnyway(array, limit, wrap, calldone, callerror);
     console.log(results.map((r, n) => (r instanceof Error ? `${n}:${r.message} error` : r)));
     assert.deepStrictEqual(results, ["0:ok: 0@a done", "1:ok: 1@b done", "2:ok: 2@c done", new Error("er: 3@d"), "4:ok: 4@e done", new Error("er: 5@f"), "6:ok: 6@g done"], "results should be Array(7) with 3,5 Error");
-    console.log(`\x1b[32m✓ all tests passed.`);
+    console.log(`\x1b[32m✓ Test kctil.PromiseAnyway passed.`);
   } catch (e) {
     console.error(`\x1b[31m✗ test failed: ${e.message}`);
     process.exit(1);
   }
+
+  // batchSlice Test
+  const batchArray = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
+  const batchTest1 = [];
+  kctil.batchSlice(batchArray, 1, (slice, serial, from, to) => batchTest1.push([slice, serial]));
+  assert.deepStrictEqual(batchTest1, [
+    [['a'], 0],
+    [['b'], 1],
+    [['c'], 2],
+    [['d'], 3],
+    [['e'], 4],
+    [['f'], 5],
+    [['g'], 6],
+    [['h'], 7],
+    [['i'], 8],
+    [['j'], 9]
+  ], "batch 1 should generate 10 sub arrays");
+
+  const batchTest3 = [];
+  kctil.batchSlice(batchArray, 3, (slice, serial, from, to) => batchTest3.push([slice, serial]));
+  assert.deepStrictEqual(batchTest3, [
+    [['a', 'b', 'c'], 0],
+    [['d', 'e', 'f'], 1],
+    [['g', 'h', 'i'], 2],
+    [['j'], 3]
+  ], "batch 3 should generate 4 sub arrays");
+
+  const batchTest5 = [];
+  kctil.batchSlice(batchArray, 5, (slice, serial, from, to) => batchTest5.push([slice, serial]));
+  assert.deepStrictEqual(batchTest5, [
+    [['a', 'b', 'c', 'd', 'e'], 0],
+    [['f', 'g', 'h', 'i', 'j'], 1]
+  ], "batch 5 should generate 2 sub arrays");
+
+  const batchTest10 = [];
+  kctil.batchSlice(batchArray, 10, (slice, serial, from, to) => batchTest10.push([slice, serial]));
+  assert.deepStrictEqual(batchTest10, [
+    [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], 0]
+  ], "batch 10 should generate 1 sub array");
+
+  const batchTest20 = [];
+  kctil.batchSlice(batchArray, 20, (slice, serial, from, to) => batchTest20.push([slice, serial]));
+  assert.deepStrictEqual(batchTest20, [
+    [['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], 0]
+  ], "batch 20 should generate 1 sub array");
+
+  console.log("\x1b[32m✓ Test kctil.batchSlice passed");
+  // batchSlice Test done
+
+  console.log(`\x1b[32m✓ all tests passed.`);
 })();
