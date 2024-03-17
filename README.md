@@ -17,6 +17,7 @@ This package encapsulates some commonly used functions
 - range
 - replaceParam
 - batchSlice
+- Queue
 
 ### PromiseAnyway
 
@@ -216,6 +217,55 @@ kctil.batchSlice(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], 3, (slice, 
 'slice:' [ 'j' ] 'serial:' 3 'from:' 9 'to:' 10
 ```
 
+### Queue, async job queue with concurrency control
+kctil.Queue implements a simple job queue system. It allows you to enqueue tasks (jobs) and execute them in parallel, with a configurable level of concurrency. Here's a brief introduction and usage guide:
+
+#### Introduction
+
+The Queue class is designed to help manage and execute asynchronous tasks in a controlled manner. It ensures that a specified number of tasks can run concurrently, while the remaining tasks are queued and executed as resources become available. This can be useful in scenarios where you need to limit the number of concurrent operations, such as making API requests or performing resource-intensive tasks.
+
+#### Usage
+
+To use the Queue class, you need to create an instance and provide two arguments:
+
+`parallel` (number): The maximum number of tasks that can run concurrently.
+`wrapFn` (function): A function that will be executed for each task. This function should be an asynchronous function (returning a `Promise`) and will receive an object containing the task arguments and some metadata.
+Here's an example of how to create a Queue instance:
+```js
+const queue = new Queue(5, async ({ key, args }) => {
+  // Perform some asynchronous task here
+  console.log(`Processing task ${key} with args:`, args);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating an async operation
+});
+```
+In this example, we create a Queue instance that allows up to 5 tasks to run concurrently. The wrapFn function simply logs the task key and arguments, and simulates an asynchronous operation using setTimeout.
+
+To enqueue a task, you can use the push method:
+```js
+queue.push('task1', { data: 'some data' });
+queue.push('task2', { data: 'another data' });
+// You can enqueue as many tasks as needed
+```
+The push method takes two arguments: a unique key for the task and an args object containing any necessary data or arguments for the task.
+
+You can check the current state of the queue using the count method:
+
+```js
+const { _qlen, _qrun } = queue.count();
+console.log(`Queue length: ${_qlen}, Running tasks: ${_qrun}`);
+```
+The count method returns an object with two properties: _qlen (the number of tasks in the queue) and _qrun (the number of tasks currently running).
+
+The Queue class internally manages the execution of tasks, ensuring that the specified concurrency limit is respected. Tasks are dequeued and executed as resources become available.
+
+Note that the provided code is a basic implementation, and you might want to enhance it with additional features, such as error handling, task prioritization, or cancellation mechanisms, depending on your specific requirements.
+
+### Different usage of these three methods
+`PromiseAnyway`: You have a certain batch of asynchronous tasks that need to be completed with controlled concurrency and collect the completed results.
+
+`Queue`(Class): You need to control the number of concurrent asynchronous tasks. The total number of tasks is unpredictable, and new tasks will be added at any time during it's running.
+
+`batchSlice`: You have a batch of tasks that need to be completed simultaneously, but not one by one, but a fixed number of tasks at once.
 
 #### License
 
