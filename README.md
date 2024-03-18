@@ -1,8 +1,204 @@
 # kctil
 
-This package encapsulates some commonly used functions
+This package contains commonly used batch asynchronous task processing functions to control the number of concurrencies.
 
 - PromiseAnyway
+- Queue
+- batchSlice
+
+### PromiseAnyway
+
+```javascript
+/**
+ * PromiseAnyway - A utility function to execute an array of asynchronous tasks with a concurrency limit
+ *
+ * @param {Array} array - An array of values to be processed asynchronously
+ * @param {number} limit - The maximum number of concurrent tasks
+ * @param {Function} wrap - A function that takes a value from the array and returns a Promise
+ * @param {Function} [calldone] - An optional callback function to be called when a task is successfully completed
+ * @param {Function} [callerror] - An optional callback function to be called when a task fails
+ * @returns {Promise<Array>} - A Promise that resolves with an array of results or errors
+ *
+ * Usage:
+ *
+ * const urls = ['https://example.com', 'https://google.com', 'https://invalid-url'];
+ *
+ * PromiseAnyway(urls, 2, (index, url) => fetch(url), (index, response, url) => {
+ *   console.log(`Fetched ${url} at index ${index} with status ${response.status}`);
+ *   return response.text();
+ * }, (index, error, url) => {
+ *   console.error(`Failed to fetch ${url} at index ${index} with error ${error.message}`);
+ * })
+ * .then(results => {
+ *   console.log('All tasks completed', results);
+ * });
+ */
+function PromiseAnyway(array, limit, wrap, calldone, callerror) {
+  // ... function implementation ...
+}
+```
+
+#### Description:
+
+The PromiseAnyway function is a utility that allows executing an array of asynchronous tasks with a concurrency limit. It takes an array of values, a concurrency limit, a wrapper function that returns a Promise for each value, and optional callback functions for successful and failed tasks.
+
+The function returns a Promise that resolves with an array of results or errors, corresponding to the order of the input array. The calldone callback is called for each successful task, and the callerror callback is called for each failed task.
+
+#### Usage:
+
+Pass an array of values to be processed asynchronously as the first argument.
+Specify the maximum number of concurrent tasks as the second argument.
+Provide a wrapper function as the third argument, which takes a value from the array and returns a Promise.
+Optionally, provide a calldone callback function as the fourth argument, which will be called when a task is successfully completed. The callback receives the index of the value, the resolved value, and the original value.
+Optionally, provide a callerror callback function as the fifth argument, which will be called when a task fails. The callback receives the index of the value, the error, and the original value.
+The returned Promise resolves with an array containing the results or errors for each value in the original array order.
+
+#### Example:
+
+In the provided example, the PromiseAnyway function is used to fetch a list of URLs concurrently with a limit of 2 concurrent requests. The calldone callback logs the successful fetch response, and the callerror callback logs the error for failed requests. The final results (either the response text or the error) are collected in the resolved Promise.
+```js
+const kctil = require('kctil');
+(async () => {
+    
+    const urls = ['https://example.com', 'https://google.com', 'https://invalid-url'];
+    kctil.PromiseAnyway(urls, 2, (index, url) => fetch(url), (index, response, url) => {
+        console.log(`Fetched ${url} at index ${index} with status ${response.status}`);
+        return response.text();
+    }, (index, error, url) => {
+        console.error(`Failed to fetch ${url} at index ${index} with error ${error.message}`);
+    }).then(results => {
+        console.log('All tasks completed', results);
+    });
+
+})();
+```
+
+This is another example
+```js
+// Example: npm i kctil node-fetch@2 -g
+const kctil = require('kctil');
+const fetch = require('node-fetch'); // not need since node.js version 18+
+(async () => {
+    let results = await kctil.PromiseAnyway(['a', 'b', 'c', 'd', 'e'], 3, async (n, v) => {
+        if ('d' == v) {
+            throw new Error(`Simulation error ${v}`);
+        }
+        const resp = await fetch(`https://httpbin.org/get?v=${v}`, { timeout: 5 * 1e3 });
+        return kctil.format('%05d: %-30s [%s]', n, v, resp.status + ' ' + resp.statusText);
+    }, (n, res, val) => (console.log(res), res), (n, err) => console.log('error index:', n, err.message));
+
+    //console.log(results);
+})()
+// If any promise fails, the index value in the results array will be an Error object
+// such as
+/**
+[
+  '00000: a                              [200 OK]',
+  '00001: b                              [200 OK]',
+  '00002: c                              [200 OK]',
+  Error: Simulation error d              .........,
+  '00004: e                              [200 OK]'
+]
+**/
+```
+
+### Queue, async job queue with concurrency control
+kctil.Queue implements a simple job queue system. It allows you to enqueue tasks (jobs) and execute them in parallel, with a configurable level of concurrency. Here's a brief introduction and usage guide:
+
+#### Introduction
+
+The Queue class is designed to help manage and execute asynchronous tasks in a controlled manner. It ensures that a specified number of tasks can run concurrently, while the remaining tasks are queued and executed as resources become available. This can be useful in scenarios where you need to limit the number of concurrent operations, such as making API requests or performing resource-intensive tasks.
+
+#### Usage
+
+To use the Queue class, you need to create an instance and provide two arguments:
+
+1.`parallel` (number): The maximum number of tasks that can run concurrently.
+2.`wrapFn` (function): A function that will be executed for each task. This function should be an asynchronous function (returning a `Promise`) and will receive an object containing the task arguments and some metadata.
+Here's an example of how to create a Queue instance:
+```js
+const queue = new Queue(5, async ({ key, args }) => {
+  // Perform some asynchronous task here
+  console.log(`Processing task ${key} with args:`, args);
+  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating an async operation
+});
+```
+In this example, we create a Queue instance that allows up to 5 tasks to run concurrently. The wrapFn function simply logs the task key and arguments, and simulates an asynchronous operation using setTimeout.
+
+To enqueue a task, you can use the push method:
+```js
+queue.push('task1', { data: 'some data' });
+queue.push('task2', { data: 'another data' });
+// You can enqueue as many tasks as needed
+```
+The push method takes two arguments: a unique key for the task and an args object containing any necessary data or arguments for the task.
+
+You can check the current state of the queue using the count method:
+
+```js
+const { _qlen, _qrun } = queue.count();
+console.log(`Queue length: ${_qlen}, Running tasks: ${_qrun}`);
+```
+The count method returns an object with two properties: _qlen (the number of tasks in the queue) and _qrun (the number of tasks currently running).
+
+The Queue class internally manages the execution of tasks, ensuring that the specified concurrency limit is respected. Tasks are dequeued and executed as resources become available.
+
+Note that the provided code is a basic implementation, and you might want to enhance it with additional features, such as error handling, task prioritization, or cancellation mechanisms, depending on your specific requirements.
+
+### batchSlice(array, batch, callback, callafter = null)
+```js
+/**
+ * batchSlice - A utility function to split an array into batches and process each batch with a callback function
+ *
+ * @param {Array} array - The input array to be processed
+ * @param {number} batch - The desired batch size (number of elements per batch)
+ * @param {Function} callback - The function to be called for each batch, receiving the batch array, batch index, start index, and end index
+ * @param {Function} [callafter] - An optional function to be called after all batches have been processed, receiving the total number of batches
+ *
+ * Usage:
+ *
+ * const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+ *
+ * batchSlice(numbers, 3, (batch, batchIndex, startIndex, endIndex) => {
+ *   console.log(`Batch ${batchIndex}: [${startIndex}, ${endIndex}] = ${batch}`);
+ * }, totalBatches => {
+ *   console.log(`Total batches processed: ${totalBatches}`);
+ * });
+ *
+ * Output:
+ * Batch 0: [0, 3] = 1,2,3
+ * Batch 1: [3, 6] = 4,5,6
+ * Batch 2: [6, 9] = 7,8,9
+ * Batch 3: [9, 10] = 10
+ * Total batches processed: 4
+ */
+function batchSlice(array, batch, callback, callafter = null) {
+  // ... function implementation ...
+}
+```
+
+Example
+
+```js
+kctil.batchSlice(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], 3, (slice, serial, from, to) => {
+  console.log('slice:', slice, 'serial:', serial, 'from:', from, 'to:', to);
+});
+// output:
+'slice:' [ 'a', 'b', 'c' ] 'serial:' 0 'from:' 0 'to:' 3
+'slice:' [ 'd', 'e', 'f' ] 'serial:' 1 'from:' 3 'to:' 6
+'slice:' [ 'g', 'h', 'i' ] 'serial:' 2 'from:' 6 'to:' 9
+'slice:' [ 'j' ] 'serial:' 3 'from:' 9 'to:' 10
+```
+
+### Different usage of these three methods
+`PromiseAnyway`: You have a certain batch of asynchronous tasks that need to be completed with controlled concurrency and collect the completed results.
+
+`Queue`(Class): You need to control the number of concurrent asynchronous tasks. The total number of tasks is unpredictable, and new tasks will be added at any time during it's running.
+
+`batchSlice`: You have a batch of tasks that need to be completed simultaneously, but not one by one, but a fixed number of tasks at once.
+
+### The following are commonly used functions
+
 - existsFile, readFile, writeFile, appendFile
 - dateTime
 - log, logr, logw, loge
@@ -16,48 +212,6 @@ This package encapsulates some commonly used functions
 - flatHash
 - range
 - replaceParam
-- batchSlice
-- Queue
-
-### PromiseAnyway
-
-```javascript
-PromiseAnyway(array, limit, wrap, [calldone = undefined], [callerror = undefined]) {
-
-}
-// @array    : Plain js array, such as [1,2,3] or ['a','b','c'];
-// @limit    : Limit the number of concurrency;
-// @wrap     : function(n, val){ return new Promise(); } A function to return a promise
-// The following are optional parameters
-// @calldone : function(n, res, val){ }, n is the index of @array array, and res is wrap function resolved value.
-//		Called when every single task is completed, and the returned value is put into the final results array,
-//		if not provided, default return is wrap function resolved value.
-// @callerror: function(n, err, val){ }, err is wrap function rejected value.
-//		Called when every single task is rejected. the returned value is just ignored.
-
-// Example: npm i kctil node-fetch -g
-const kctil = require('kctil');
-const fetch = require('node-fetch');
-let results = await kctil.PromiseAnyway(['a', 'b', 'c', 'd', 'e'], 3, (n, v)=> new Promise(async (r,j) => {
-		try {
-			let resp = await fetch(`http://test.com/${v}.html`);
-			r(kctil.format('%05d: %-30s [%s]', n, v, resp.status + ' ' + resp.statusText));
-		} catch (e) {
-			j(kctil.format('%05d: %-30s [%s]', n, v, e.message));
-		}
-}), (n,res,val) => (console.log(res), res), (n, err) => console.log(err) );
-// If any promise fails, the index value in the results array will be an Error object
-// such as
-/**
-[
-  '00000: a                              [462 ]',
-  '00001: b                              [462 ]',
-  '00002: c                              [462 ]',
-  Error: 00003: d                    [network timeout at:,...]
-  '00004: e                              [462 ]'
-]
-**/
-```
 
 ### existsFile(filename)
 
@@ -202,70 +356,6 @@ kctil.replaceParam("count={stats[0].count}&title={stats[0].title.first[0].abbr}&
 // output: 
 count=5&title=userStat&summary=&amount=0
 ```
-
-### batchSlice(array, batch, callback, callafter = null)
-
-kctil.batchSlice is to split an array into a fixed number of batches and pass them to the callback function
-```js
-kctil.batchSlice(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], 3, (slice, serial, from, to) => {
-  console.log('slice:', slice, 'serial:', serial, 'from:', from, 'to:', to);
-});
-// output:
-'slice:' [ 'a', 'b', 'c' ] 'serial:' 0 'from:' 0 'to:' 3
-'slice:' [ 'd', 'e', 'f' ] 'serial:' 1 'from:' 3 'to:' 6
-'slice:' [ 'g', 'h', 'i' ] 'serial:' 2 'from:' 6 'to:' 9
-'slice:' [ 'j' ] 'serial:' 3 'from:' 9 'to:' 10
-```
-
-### Queue, async job queue with concurrency control
-kctil.Queue implements a simple job queue system. It allows you to enqueue tasks (jobs) and execute them in parallel, with a configurable level of concurrency. Here's a brief introduction and usage guide:
-
-#### Introduction
-
-The Queue class is designed to help manage and execute asynchronous tasks in a controlled manner. It ensures that a specified number of tasks can run concurrently, while the remaining tasks are queued and executed as resources become available. This can be useful in scenarios where you need to limit the number of concurrent operations, such as making API requests or performing resource-intensive tasks.
-
-#### Usage
-
-To use the Queue class, you need to create an instance and provide two arguments:
-
-`parallel` (number): The maximum number of tasks that can run concurrently.
-`wrapFn` (function): A function that will be executed for each task. This function should be an asynchronous function (returning a `Promise`) and will receive an object containing the task arguments and some metadata.
-Here's an example of how to create a Queue instance:
-```js
-const queue = new Queue(5, async ({ key, args }) => {
-  // Perform some asynchronous task here
-  console.log(`Processing task ${key} with args:`, args);
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Simulating an async operation
-});
-```
-In this example, we create a Queue instance that allows up to 5 tasks to run concurrently. The wrapFn function simply logs the task key and arguments, and simulates an asynchronous operation using setTimeout.
-
-To enqueue a task, you can use the push method:
-```js
-queue.push('task1', { data: 'some data' });
-queue.push('task2', { data: 'another data' });
-// You can enqueue as many tasks as needed
-```
-The push method takes two arguments: a unique key for the task and an args object containing any necessary data or arguments for the task.
-
-You can check the current state of the queue using the count method:
-
-```js
-const { _qlen, _qrun } = queue.count();
-console.log(`Queue length: ${_qlen}, Running tasks: ${_qrun}`);
-```
-The count method returns an object with two properties: _qlen (the number of tasks in the queue) and _qrun (the number of tasks currently running).
-
-The Queue class internally manages the execution of tasks, ensuring that the specified concurrency limit is respected. Tasks are dequeued and executed as resources become available.
-
-Note that the provided code is a basic implementation, and you might want to enhance it with additional features, such as error handling, task prioritization, or cancellation mechanisms, depending on your specific requirements.
-
-### Different usage of these three methods
-`PromiseAnyway`: You have a certain batch of asynchronous tasks that need to be completed with controlled concurrency and collect the completed results.
-
-`Queue`(Class): You need to control the number of concurrent asynchronous tasks. The total number of tasks is unpredictable, and new tasks will be added at any time during it's running.
-
-`batchSlice`: You have a batch of tasks that need to be completed simultaneously, but not one by one, but a fixed number of tasks at once.
 
 #### License
 

@@ -250,6 +250,8 @@ class Queue {
 
 module.exports = {
     PromiseAnyway,
+    Queue,
+    batchSlice,
     existsFile,
     readFile,
     writeFile,
@@ -270,8 +272,6 @@ module.exports = {
     flatHash,
     range,
     replaceParam,
-    batchSlice,
-    Queue,
     SECOND,
     MINUTE,
     HOUR,
